@@ -13,10 +13,10 @@ $$
 $$
 
 <p align="center">
-  <img src="/figures/figure 1.png" width="400"/>
+  <img src="/figures/figure1.png" width="400"/>
 </p>
 
-Figure 1: Schematic representation of a free energy surface along a reaction coordinate 𝑞, with reactant (A) and product (B) basins separated by a barrier. The peak of the barrier is located at 𝑞<sup>*</sup>, which is often chosen as the dividing surface 𝑞<sub>1</sub> in rate calculations, although its exact position is somewhat arbitrary within the formalism.
+Figure 1: Schematic representation of a free energy surface along a reaction coordinate 𝑞, with reactant (A) and product (B) basins separated by a barrier. The peak of the barrier is located at 𝑞<sup>*</sup>, which is often chosen as the dividing surface 𝑞<sub>1</sub> in rate calculations. However, its exact position is somewhat arbitrary within the formalism.
 
 Here, _q_ is the reaction coordinate, with _q<sub>1</sub>_ defining the dividing surface-—typically placed at the transition state. The delta function _𝛿(q(0)-q<sub>1</sub>)_ ensures that all trajectories start exactly at this surface. The dot over _q_, written as _q̇(0)_, refers to the velocity along the reaction coordinate at time zero. The Heaviside step function _θ(q(t)-q<sub>1</sub>_) checks whether, after some time 𝑡, the trajectory has moved to the product side (i.e., _q_ > _q<sub>1</sub>_). The numerator, then, gives the flux of trajectories that start at the dividing surface and move toward products. The denominator, 0.5⟨∣_q̇(0)_∣⟩, comes from the TST flux and normalizes this expression. Together, the ratio defines κ(t), which corrects the TST rate by accounting for dynamical recrossings.
 
@@ -54,7 +54,7 @@ Once this plateau is reached, the final value of κ can be multiplied by the sta
 
 
 ## Example
-In this example, we consider the dissociation of a CaSO4 ion pair in bulk water and compute the corresponding rate constant using the Bennett-Chandler method.The reaction coordinate (RC) is defined as the distance between the Ca<sup>2+</sup> ion and the sulfur atom (S) in the sulfate group. Since the sulfate oxygens are harmonically constrained to the sulfur atom, this provides a simple yet effective RC.
+In this example, we consider the dissociation of a CaSO4 ion pair in bulk water and compute the corresponding rate constant using the Bennett-Chandler method. The reaction coordinate (RC) is defined as the distance between the Ca<sup>2+</sup> ion and the sulfur atom (S) in the sulfate group. Since the sulfate oxygens are harmonically constrained to the sulfur atom, this provides a simple yet effective RC.
 This example assumes that a well-converged free energy profile is available, with a clear barrier separating states. To sample configurations near the top of this barrier, we run restrained MD simulations using [LAMMPS](https://www.lammps.org/#gsc.tab=0) and the [Colvars](https://colvars.github.io/master/colvars-refman-lammps.html) module, which allows us to constrain the system around the dividing surface. From this, we generate a large ensemble (5,000) of short, unbiased trajectories, the "shooting" simulations to capture the system's dynamics near the transition state.
 An example MD simulation can be found in the ```prep/ ``` folder. A 0.25 ns simulation is performed at the barrier top to generate a diverse ensemble of initial configurations. These configurations are then split into 5,000 frames using the script ```1_rename.sh```, which also creates the necessary directory structure for each trajectory:
 ```
@@ -66,7 +66,7 @@ This script performs the following:
 -Copies template input files (```conf.xyz```,```input.lmp```, ```colvar_inp```, ```data.lmpdat```) into 5000 directories named ```test0000```, ```test0001```, ..., ```test4999```.
 -Sets the force constant to zero and fixes a placeholder velocity seed.
 Next, run the velocity randomization script: ```bash 2_velocity.sh```, which assigns unique random seeds for the initial velocity generation in each simulation, ensuring statistically independent runs. Once each folder has the necessary files, simulations can be launched with: ```bash 3_jobs.sh```. 
-**Note**: This script launches all 5000 jobs in the background using mpirun. Please modify it as needed to suit cluster's job submission system, especially to avoid overloading the system.
+**Note**: This script launches all 5000 jobs in the background using mpirun. Please modify it as needed to suit the cluster's job submission system, especially to avoid overloading the system.
 
 Once the simulations complete, you can analyze whether the reaction coordinate sampled values on both sides of the barrier using ```bash above_below.sh```. This script averages the last 20 values of the reaction coordinate from each trajectory (q_1.colvars.traj) and reports the number of trajectories ending above and below the dividing plane. Next, compute the numerator of the transmission coefficient κ(t) from each simulation ```python q1_process.py``` and create ```num.traj``` file in each directory, containing time-resolved data. 
 Finally, run the ensemble averaging script, ```python analysis.py```. This will gather all ```num.traj``` files and compute the transmission coefficient with respect to time. 
