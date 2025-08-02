@@ -1,0 +1,32 @@
+
+colvarsTrajFrequency 1
+
+colvar {
+name u
+width 0.63
+
+distance {
+group1 { atomNumbers 760  }
+group2 { atomNumbers 765  }
+}
+
+}
+
+colvar {
+name v
+width 3.0
+
+coordNum {
+cutoff 3.4
+expNumer 48
+expDenom 96
+group1 {atomNumbers 760 765 }
+group2 {atomNumbersRange 1-759}
+}
+}
+
+harmonic {
+colvars u v
+centers 4.23 28.99
+forceConstant 200
+}
