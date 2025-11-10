@@ -21,9 +21,9 @@ Figure 1: Schematic representation of a free energy surface along a reaction coo
 Here, _q_ is the reaction coordinate, with _q<sub>1</sub>_ defining the dividing surface-—typically placed at the transition state. The delta function _𝛿(q(0)-q<sub>1</sub>)_ ensures that all trajectories start exactly at this surface. The dot over _q_, written as _q̇(0)_, refers to the velocity along the reaction coordinate at time zero. The Heaviside step function _θ(q(t)-q<sub>1</sub>_) checks whether, after some time 𝑡, the trajectory has moved to the product side (i.e., _q_ > _q<sub>1</sub>_). The numerator, then, gives the flux of trajectories that start at the dividing surface and move toward products. The denominator, 0.5⟨∣_q̇(0)_∣⟩, comes from the TST flux and normalizes this expression. Together, the ratio defines κ(t), which corrects the TST rate by accounting for dynamical recrossings.
 
 ## Workflow
-To reliably compute rate constants, begin with a well-converged free energy profile along the reaction coordinate q. The location of the barrier top (the dividing surface, q₁) can be determined by committor analysis or by identifying the peak of the free energy profile. Once q₁ is established, sample initial configurations around this point for further analysis.
-Sampling is commonly performed by running a constrained MD simulation at q₁, applying a strong harmonic restraint to maintain the system near the barrier top. The generated snapshots from this simulation serve as initial conditions for a series of unbiased, short MD runs. These are often referred to as "shooting trajectories" and allow the system to evolve naturally from the transition state. Each trajectory should be sufficiently long to capture transitions into either reactant or product basins. Typically, a few picoseconds are sufficient, but this depends on the barrier height; if the barrier is small (~k<sub>B</sub>T), the coordinate may fluctuate between states before settling.
-After collecting these trajectories, we evaluate the direction and fate of each one. Specifically, we calculate the numerator of the transmission coefficient κ(t) using a function N(t) that combines the initial velocity and the Heaviside step function based on whether the system reached the product side. The relevant values from a single trajectory may look like:
+To reliably compute rate constants, begin with a well-converged free energy profile along the reaction coordinate _q_. The location of the barrier top (the dividing surface, _q₁_ can be determined by committor analysis or by identifying the peak of the free energy profile. Once q₁ is established, sample initial configurations around this point for further analysis.
+Sampling is commonly performed by running a constrained MD simulation at _q₁_, applying a strong harmonic restraint to maintain the system near the barrier top. The generated snapshots from this simulation serve as initial conditions for a series of unbiased, short MD runs. These are often referred to as "shooting trajectories" and allow the system to evolve naturally from the transition state. Each trajectory should be sufficiently long to capture transitions into either reactant or product basins. Typically, a few picoseconds are sufficient, but this depends on the barrier height; if the barrier is small _(~k<sub>B</sub>T)_, the coordinate may fluctuate between states before settling.
+After collecting these trajectories, we evaluate the direction and fate of each one. Specifically, we calculate the numerator of the transmission coefficient _κ(t)_ using a function _N(t)_ that combines the initial velocity and the Heaviside step function based on whether the system reached the product side. The relevant values from a single trajectory may look like:
 
 ```
 #step qt θt V0 Nt
@@ -33,14 +33,14 @@ After collecting these trajectories, we evaluate the direction and fate of each 
 ...
 2000 4.59618354500682 1 -0.0022655275324898008 -0.0022655275324898008
 ```
-These values are then aggregated across all simulations to compute the average N(t) and average |V₀| across all time steps. The transmission coefficient is then computed as:
+These values are then aggregated across all simulations to compute the average _N(t)_ and average |_V₀_| across all time steps. The transmission coefficient is then computed as:
 
 $$
 \kappa(t) = \frac{ \langle N(t) \rangle }{ \frac{1}{2} \left\langle |\dot{q}(0)| \right\rangle }
 $$
 
 
-The result is a time series of κ(t), which begins at zero and increases as the system evolves. It is essential that κ(t) eventually reaches a plateau, indicating that recrossings have stabilized and the rate constant is accurate. A typical κ(t) curve might look like this:```
+The result is a time series of _κ(t)_, which begins at zero and increases as the system evolves. It is essential that _κ(t)_ eventually reaches a plateau, indicating that recrossings have stabilized and the rate constant is accurate. A typical _κ(t)_ curve might look like this:```
 
 ```
 #step Nt V0 kt
@@ -50,7 +50,7 @@ The result is a time series of κ(t), which begins at zero and increases as the 
 ...
 2000 8.22e-05 0.00150 0.1095
 ```
-Once this plateau is reached, the final value of κ can be multiplied by the static TST prefactor to yield the corrected rate constant k(T). This completes the dynamical correction to transition state theory.
+Once this plateau is reached, the final value of κ can be multiplied by the static TST prefactor to yield the corrected rate constant _k(T)_. This completes the dynamical correction to transition state theory.
 
 
 ## Example
@@ -68,7 +68,7 @@ This script performs the following:
 Next, run the velocity randomization script: ```bash 2_velocity.sh```, which assigns unique random seeds for the initial velocity generation in each simulation, ensuring statistically independent runs. Once each folder has the necessary files, simulations can be launched with: ```bash 3_jobs.sh```. 
 **Note**: This script launches all 5000 jobs in the background using mpirun. Please modify it as needed to suit the cluster's job submission system, especially to avoid overloading the system.
 
-Once the simulations complete, you can analyze whether the reaction coordinate sampled values on both sides of the barrier using ```python above_below.py```. This script averages the last 20 values of the reaction coordinate from each trajectory (q_1.colvars.traj) and reports the number of trajectories ending above and below the dividing plane. Next, compute the numerator of the transmission coefficient κ(t) from each simulation ```python q1_process.py``` and create ```num.traj``` file in each directory, containing time-resolved data. 
+Once the simulations complete, you can analyze whether the reaction coordinate sampled values on both sides of the barrier using ```python above_below.py```. This script averages the last 20 values of the reaction coordinate from each trajectory (q_1.colvars.traj) and reports the number of trajectories ending above and below the dividing plane. Next, compute the numerator of the transmission coefficient _κ(t)_ from each simulation ```python q1_process.py``` and create ```num.traj``` file in each directory, containing time-resolved data. 
 Finally, run the ensemble averaging script, ```python analysis.py```. This will gather all ```num.traj``` files and compute the transmission coefficient with respect to time. 
 _κ(t)_ can be visualized using ```gnuplot``` , ```metplotlib``` or any other plotting tool. For example, 
 ```
